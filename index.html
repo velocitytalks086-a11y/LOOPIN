@@ -1,0 +1,78 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LOOPIN — People. Skills. Solutions.</title><meta name="description" content="LOOPIN connects people who need help with people who have the skills, resources, and knowledge to make things happen.">
+<meta property="og:title" content="LOOPIN — Someone out there can help"><meta name="theme-color" content="#10151E"><link rel="icon" href="favicon.svg">
+<style>
+:root{--bg:#10151E;--bg2:#171E29;--card:#202835;--ac:#D8FF65;--tx:#F5F7FA;--tx2:#B6C0CE;--bd:#303846;--err:#FF7777;--ok:#78D9A0}
+@media(prefers-color-scheme:light){:root{--bg:#F5F7FA;--bg2:#fff;--card:#fff;--tx:#10151E;--tx2:#475264;--bd:#D5DBE5}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.55 Inter,Geist,system-ui,sans-serif}
+a{color:inherit}button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.w{max-width:1040px;margin:0 auto;padding:0 20px}
+header{border-bottom:1px solid var(--bd)}header .w{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{display:flex;gap:10px;align-items:center;font-weight:800;letter-spacing:.04em;text-decoration:none}.logo img{width:30px;height:30px}
+.btn{background:var(--ac);color:#10151E;border:0;border-radius:10px;padding:10px 18px;font-weight:700;cursor:pointer}
+.btn.g{background:none;color:var(--tx);border:1px solid var(--bd)}.btn:disabled{opacity:.5}
+h1{font-size:clamp(2.4rem,7vw,4.6rem);line-height:1.02;margin:0 0 18px;font-weight:800;letter-spacing:-.03em}
+.hero{padding:72px 0 56px;display:grid;gap:32px;grid-template-columns:1.2fr 1fr;align-items:center}
+@media(max-width:760px){.hero{grid-template-columns:1fr}}
+.hero p{color:var(--tx2);max-width:46ch;font-size:1.1rem}.row{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+section.s{padding:40px 0;border-top:1px solid var(--bd)}h2{font-size:1.5rem;margin:0 0 20px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:18px}.card h3{margin:0 0 6px;font-size:1.05rem}.card p{margin:0;color:var(--tx2)}
+.meta{font-size:.82rem;color:var(--tx2);font-variant-numeric:tabular-nums}.tag{display:inline-block;border:1px solid var(--bd);border-radius:6px;padding:1px 8px;font-size:.78rem;margin:6px 6px 0 0;color:var(--tx2)}
+input,textarea,select{width:100%;background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;margin:6px 0 12px}
+label{font-size:.9rem;color:var(--tx2)}.box{max-width:420px;margin:48px auto}.msg{padding:10px 12px;border-radius:10px;margin:0 0 12px;border:1px solid var(--bd)}.msg.e{color:var(--err);border-color:var(--err)}.msg.o{color:var(--ok);border-color:var(--ok)}
+nav.t{display:flex;gap:6px;margin:24px 0}nav.t button{background:none;border:0;border-bottom:2px solid transparent;padding:8px 14px;cursor:pointer;color:var(--tx2)}nav.t button[aria-selected=true]{color:var(--tx);border-color:var(--ac)}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.bar input{flex:1;min-width:180px;margin:0}.empty{text-align:center;padding:40px 16px;color:var(--tx2);border:1px dashed var(--bd);border-radius:14px}
+footer{border-top:1px solid var(--bd);padding:28px 0;color:var(--tx2);font-size:.9rem}
+@media(prefers-reduced-motion:no-preference){.btn{transition:transform .12s}.btn:active{transform:scale(.97)}}
+</style></head><body>
+<header><div class="w"><a class="logo" href="/"><img src="favicon.svg" alt="">LOOPIN</a><div id="hnav" class="row" style="margin:0"></div></div></header>
+<main id="app" class="w" aria-live="polite"></main>
+<footer><div class="w">LOOPIN — People. Skills. Solutions. &nbsp;Meet in public places, protect personal details, and involve a trusted adult if you are under 18.</div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+const C=window.LOOPIN_CONFIG||{},$=s=>document.querySelector(s),app=$('#app'),hn=$('#hnav');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const CATS=['Design and creativity','Technology and coding','Education and learning','Writing and communication','Business and projects','Repairs and practical skills','Events and volunteering','Everyday resources','Recommendations','Other'];
+const ago=d=>{const m=(Date.now()-new Date(d))/6e4;return m<60?Math.max(1,~~m)+'m ago':m<1440?~~(m/60)+'h ago':~~(m/1440)+'d ago'};
+const ok=!!(C.SUPABASE_URL&&C.SUPABASE_ANON_KEY);let db,user=null,tab='requests';
+function note(t,k='e'){return `<p class="msg ${k}" role="alert">${esc(t)}</p>`}
+function landing(){hn.innerHTML=`<button class="btn g" id="li">Log in</button><button class="btn" id="su">Join LOOPIN</button>`;
+$('#li').onclick=()=>auth('in');$('#su').onclick=()=>auth('up');
+app.innerHTML=`<div class="hero"><div><h1>Someone out there can help.</h1><p>LOOPIN connects people who need help with people who have the skills, resources, and knowledge to make things happen.</p><div class="row"><button class="btn" id="j">Join LOOPIN</button><a class="btn g" href="#how" style="text-decoration:none">Explore how it works</a></div></div>
+<svg viewBox="0 0 320 320" role="img" aria-label="Connected nodes forming a loop"><circle cx="160" cy="160" r="110" fill="none" stroke="#D8FF65" stroke-width="3" stroke-dasharray="3 12" stroke-linecap="round"/><g stroke="#303846" stroke-width="2"><path d="M160 50L255 215L65 215Z" fill="none"/><path d="M160 160L160 50M160 160L255 215M160 160L65 215"/></g><g fill="#202835" stroke="#D8FF65" stroke-width="3"><circle cx="160" cy="50" r="16"/><circle cx="255" cy="215" r="16"/><circle cx="65" cy="215" r="16"/></g><circle cx="160" cy="160" r="22" fill="#D8FF65"/></svg></div>
+<section class="s" id="how"><h2>How it works</h2><div class="grid"><div class="card"><h3>Share what you need</h3><p>Post a request, or offer a skill you can share.</p></div><div class="card"><h3>Discover the right people</h3><p>Search requests and offers by category and keyword.</p></div><div class="card"><h3>Connect and collaborate</h3><p>Respond to requests and agree terms: free, exchange, or paid.</p></div><div class="card"><h3>Complete the task</h3><p>Close the request once the problem is solved.</p></div></div></section>
+<section class="s"><h2>Your next connection could solve everything.</h2><button class="btn" id="j2">Get started</button></section>`;
+$('#j').onclick=$('#j2').onclick=()=>auth('up')}
+function auth(m){const up=m==='up';app.innerHTML=`<form class="box card" id="f"><h2>${up?'Create your account':'Log in'}</h2><div id="m"></div>${up?'<label>Display name<input name="name" required maxlength="60"></label>':''}<label>Email<input name="email" type="email" required autocomplete="email"></label><label>Password<input name="pw" type="password" required minlength="8" autocomplete="${up?'new-password':'current-password'}"></label><button class="btn" style="width:100%">${up?'Create account':'Log in'}</button>${up?'':'<p><a href="#" id="fg">Forgot password?</a></p>'}<p class="meta">${up?'Have an account? <a href="#" id="sw">Log in</a>':'New here? <a href="#" id="sw">Create an account</a>'}</p></form>`;
+$('#sw').onclick=e=>{e.preventDefault();auth(up?'in':'up')};const fg=$('#fg');
+if(fg)fg.onclick=async e=>{e.preventDefault();const em=$('#f [name=email]').value;if(!em)return $('#m').innerHTML=note('Enter your email first.');const{error}=await db.auth.resetPasswordForEmail(em,{redirectTo:location.origin});$('#m').innerHTML=error?note(error.message):note('Check your inbox for a reset link.','o')};
+$('#f').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button.btn');b.disabled=true;const d=Object.fromEntries(new FormData(e.target));
+const r=up?await db.auth.signUp({email:d.email,password:d.pw,options:{data:{name:d.name},emailRedirectTo:location.origin}}):await db.auth.signInWithPassword({email:d.email,password:d.pw});b.disabled=false;
+if(r.error)return $('#m').innerHTML=note(r.error.message);if(up&&!r.data.session)return $('#m').innerHTML=note('Account created. Verify your email, then log in.','o')}}
+function shell(){hn.innerHTML=`<span class="meta">${esc(user.email)}</span><button class="btn g" id="lo">Log out</button>`;$('#lo').onclick=()=>db.auth.signOut();
+app.innerHTML=`<nav class="t" role="tablist"><button role="tab" data-t="requests">Requests</button><button role="tab" data-t="offers">Offers</button><button role="tab" data-t="mine">My activity</button></nav><div id="v"></div>`;
+app.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;view()});view()}
+function view(){app.querySelectorAll('[data-t]').forEach(b=>b.setAttribute('aria-selected',b.dataset.t===tab));tab==='mine'?mine():list(tab)}
+async function list(kind){const v=$('#v');const isR=kind==='requests';let q='',cat='';
+v.innerHTML=`<div class="bar"><input id="q" type="search" placeholder="Search ${kind}" aria-label="Search"><select id="c" style="width:auto;margin:0" aria-label="Category"><option value="">All categories</option>${CATS.map(c=>`<option>${c}</option>`).join('')}</select><button class="btn" id="new">${isR?'Post a request':'Offer your skills'}</button></div><div id="r" class="grid" style="margin-top:16px"><p class="meta">Loading…</p></div>`;
+const run=async()=>{let x=db.from(kind).select('*, profiles(display_name)').order('created_at',{ascending:false}).limit(30);if(isR)x=x.in('status',['open','responses_received']);else x=x.eq('active',true);
+if(cat)x=x.eq('category',cat);if(q)x=x.or(`title.ilike.%${q}%,description.ilike.%${q}%`);const{data,error}=await x;const r=$('#r');
+if(error)return r.innerHTML=`<div>${note(error.message)}<button class="btn g" id="rt">Retry</button></div>`,$('#rt').onclick=run;
+if(!data.length)return r.innerHTML=`<div class="empty" style="grid-column:1/-1">${q||cat?'No matches. Clear the filters or try another keyword.':`No ${kind} yet. Be the first to ${isR?'post a request':'offer a skill'}.`}</div>`;
+r.innerHTML=data.map(i=>`<article class="card"><h3>${esc(i.title)}</h3><p>${esc(i.description.slice(0,140))}${i.description.length>140?'…':''}</p><span class="tag">${esc(i.category)}</span><span class="tag">${esc(i.assistance||i.arrangement)}</span><p class="meta" style="margin-top:10px">${esc(i.profiles?.display_name||'Member')} · ${ago(i.created_at)}</p>${isR&&i.owner!==user.id?`<button class="btn g" style="margin-top:10px" data-r="${i.id}">Offer help</button>`:''}</article>`).join('');
+r.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>respond(b.dataset.r))};
+let t;$('#q').oninput=e=>{clearTimeout(t);t=setTimeout(()=>{q=e.target.value.trim().replace(/[,()%]/g,'');run()},300)};$('#c').onchange=e=>{cat=e.target.value;run()};$('#new').onclick=()=>form(kind);run()}
+function form(kind){const isR=kind==='requests';$('#v').innerHTML=`<form class="card" id="nf" style="max-width:620px"><h2>${isR?'Post a request':'Offer your skills'}</h2><div id="m"></div><label>Title<input name="title" required minlength="5" maxlength="120"></label><label>Description<textarea name="description" rows="5" required></textarea></label><label>Category<select name="category">${CATS.map(c=>`<option>${c}</option>`).join('')}</select></label><label>${isR?'Type of assistance':'Arrangement'}<select name="${isR?'assistance':'arrangement'}"><option>free</option><option>exchange</option><option>advice</option><option>tutoring</option><option>volunteering</option><option>paid</option></select></label><label>Skills (comma separated)<input name="skills"></label><div class="row" style="margin:0"><button class="btn">Publish</button><button type="button" class="btn g" id="cx">Cancel</button></div></form>`;
+$('#cx').onclick=view;$('#nf').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('.btn');b.disabled=true;const d=Object.fromEntries(new FormData(e.target));d.skills=(d.skills||'').split(',').map(s=>s.trim()).filter(Boolean);const{error}=await db.from(kind).insert(d);b.disabled=false;if(error)return $('#m').innerHTML=note(error.message);tab=kind;shell()}}
+async function respond(id){const message=prompt('Say how you can help (keep personal details private):');if(!message||!message.trim())return;const{error}=await db.from('request_responses').insert({request_id:id,message:message.trim()});alert(error?(error.code==='23505'?'You already responded to this request.':error.message):'Response sent.')}
+async function mine(){const v=$('#v');v.innerHTML='<p class="meta">Loading…</p>';const[a,b,c]=await Promise.all([db.from('requests').select('*').eq('owner',user.id).order('created_at',{ascending:false}),db.from('offers').select('*').eq('owner',user.id).order('created_at',{ascending:false}),db.from('request_responses').select('*, requests(title)').eq('responder',user.id)]);
+const sec=(t,rows,f)=>`<h2 style="margin-top:24px">${t}</h2>${rows?.length?`<div class="grid">${rows.map(f).join('')}</div>`:`<div class="empty">Nothing here yet.</div>`}`;
+v.innerHTML=sec('Requests I posted',a.data,r=>`<div class="card"><h3>${esc(r.title)}</h3><p class="meta">${esc(r.status)} · ${ago(r.created_at)}</p>${r.status==='open'?`<button class="btn g" style="margin-top:10px" data-x="${r.id}">Close request</button>`:''}</div>`)+sec('My offers',b.data,o=>`<div class="card"><h3>${esc(o.title)}</h3><p class="meta">${o.active?'active':'paused'}</p><button class="btn g" style="margin-top:10px" data-p="${o.id}" data-a="${o.active}">${o.active?'Pause':'Resume'}</button></div>`)+sec('Requests I responded to',c.data,r=>`<div class="card"><h3>${esc(r.requests?.title||'Request')}</h3><p>${esc(r.message)}</p></div>`);
+v.querySelectorAll('[data-x]').forEach(x=>x.onclick=async()=>{await db.from('requests').update({status:'closed'}).eq('id',x.dataset.x);mine()});v.querySelectorAll('[data-p]').forEach(x=>x.onclick=async()=>{await db.from('offers').update({active:x.dataset.a!=='true'}).eq('id',x.dataset.p);mine()})}
+function setup(){app.innerHTML=`<div class="box card"><h2>Connect your Supabase project</h2><p>LOOPIN needs a backend. Run <code>supabase/schema.sql</code> in the Supabase SQL editor, then put your project URL and anon key in <code>config.js</code> and redeploy. See README.md.</p></div>`}
+if(!ok){hn.innerHTML='';setup()}else{db=supabase.createClient(C.SUPABASE_URL,C.SUPABASE_ANON_KEY);
+db.auth.onAuthStateChange((_e,s)=>{user=s?.user||null;user?shell():landing()});db.auth.getSession().then(({data})=>{if(!data.session)landing()})}
+</script></body></html>
